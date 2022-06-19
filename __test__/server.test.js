@@ -24,108 +24,7 @@ afterAll(async () => {
   await db.drop();
 });
 
-describe('Auth Router', () => {
 
-  it('add a new user', async () => {
-
-    const response = await mockRequest.post('/signup').send(userData.testUser);
-    expect(response.status).toBe(201); });
-
-  it(' signin at basicauth', async () => {
-    let { username, password } = userData.testUser;
-    const response = await mockRequest.post('/signin')
-      .auth(username, password);
-
-    const userObject = response.body;
-    expect(response.status).toBe(200);
-    
-  });
-
-  it('signin user at bearer auth token', async () => {
-    let { username, password } = userData.testUser;
-
-   
-    const response = await mockRequest.post('/signin')
-      .auth(username, password);
-
-    accessToken = response.body.token;
-
-    
-    const bearerResponse = await mockRequest
-      .get('/users')
-      .set('Authorization', `Bearer ${accessToken}`);
-
-    
-    expect(bearerResponse.status).toBe(200);
-  });
-
-  it(' wrong password  or username ', async () => {
-
-    const response = await mockRequest.post('/signin')
-      .auth('admin', 'xyz')
-    const { user, token } = response.body;
-
-    expect(response.status).toBe(403);
-    expect(response.text).toEqual("Invalid Signin");
-    expect(user).not.toBeDefined();
-    expect(token).not.toBeDefined();
-  });
-
-  it('not signup username', async () => {
-
-    const response = await mockRequest.post('/signin')
-      .auth('nobody', 'xyz')
-    const { user, token } = response.body;
-
-    expect(response.status).toBe(403);
-    expect(response.text).toEqual("Invalid Signin");
-    expect(user).not.toBeDefined();
-    expect(token).not.toBeDefined();
-  });
-
-  it(' invalid token', async () => {
-
-  
-    const response = await mockRequest.get('/users')
-      .set('Authorization', `Bearer foobar`)
-    const userList = response.body;
-
-   
-    expect(response.status).toBe(403);
-    expect(response.text).toEqual("Invalid Signin");
-    expect(userList.length).toBeFalsy();
-  });
-
-  it(' valid token', async () => {
-
-    const response = await mockRequest.get('/users')
-      .set('Authorization', `Bearer ${accessToken}`);
-
-    expect(response.status).toBe(200);
-    expect(response.body).toBeTruthy();
-    expect(response.body).toEqual(expect.anything());
-  });
-
-  it('Secret Route fails with invalid token', async () => {
-    const response = await mockRequest.get('/secret')
-      .set('Authorization', `bearer accessgranted`);
-
-    expect(response.status).toBe(403);
-    expect(response.text).toEqual("Invalid Signin");
-  });
-});
-let userInfo = {
-    admin: { username: 'admin-basic', password: 'password' },
-  };
-  
-  
-  beforeAll(async () => {
-    await db.sync();
- 
-  });
-  afterAll(async () => {
-    await db.drop();
-  });
   
   describe('Auth Middleware', () => {
   
@@ -171,6 +70,109 @@ let userInfo = {
       });
     });
   });
+  describe('Auth Router', () => {
+
+    it('add a new user', async () => {
+  
+      const response = await mockRequest.post('/signup').send(userData.testUser);
+      expect(response.status).toBe(201); });
+  
+    it(' signin at basicauth', async () => {
+      let { username, password } = userData.testUser;
+      const response = await mockRequest.post('/signin')
+        .auth(username, password);
+  
+      const userObject = response.body;
+      expect(response.status).toBe(200);
+      
+    });
+  
+    it('signin user at bearer auth token', async () => {
+      let { username, password } = userData.testUser;
+  
+     
+      const response = await mockRequest.post('/signin')
+        .auth(username, password);
+  
+      accessToken = response.body.token;
+  
+      
+      const bearerResponse = await mockRequest
+        .get('/users')
+        .set('Authorization', `Bearer ${accessToken}`);
+  
+      
+      expect(bearerResponse.status).toBe(200);
+    });
+  
+    it(' wrong password  or username ', async () => {
+  
+      const response = await mockRequest.post('/signin')
+        .auth('admin', 'xyz')
+      const { user, token } = response.body;
+  
+      expect(response.status).toBe(403);
+      expect(response.text).toEqual("Invalid Signin");
+      expect(user).not.toBeDefined();
+      expect(token).not.toBeDefined();
+    });
+  
+    it('not signup username', async () => {
+  
+      const response = await mockRequest.post('/signin')
+        .auth('nobody', 'xyz')
+      const { user, token } = response.body;
+  
+      expect(response.status).toBe(403);
+      expect(response.text).toEqual("Invalid Signin");
+      expect(user).not.toBeDefined();
+      expect(token).not.toBeDefined();
+    });
+  
+    it(' invalid token', async () => {
+  
+    
+      const response = await mockRequest.get('/users')
+        .set('Authorization', `Bearer foobar`)
+      const userList = response.body;
+  
+     
+      expect(response.status).toBe(403);
+      expect(response.text).toEqual("Invalid Signin");
+      expect(userList.length).toBeFalsy();
+    });
+  
+    it(' valid token', async () => {
+  
+      const response = await mockRequest.get('/users')
+        .set('Authorization', `Bearer ${accessToken}`);
+  
+      expect(response.status).toBe(200);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toEqual(expect.anything());
+    });
+  
+    it('Secret Route fails with invalid token', async () => {
+      const response = await mockRequest.get('/secret')
+        .set('Authorization', `bearer accessgranted`);
+  
+      expect(response.status).toBe(403);
+      expect(response.text).toEqual("Invalid Signin");
+    });
+  });
+  let userInfo = {
+      admin: { username: 'admin-basic', password: 'password' },
+    };
+    
+    
+    beforeAll(async () => {
+      await db.sync();
+   
+    });
+    afterAll(async () => {
+      await db.drop();
+    });
+    
 
   describe('Auth-api Router', () => {
       test("img at get method" , async ()=>{
