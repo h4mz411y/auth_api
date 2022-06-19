@@ -1,72 +1,67 @@
 'use strict';
 
 require("dotenv").config();
-// const {sequelize,DataTypes}=require("../../index.model");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const SECRET = process.env.API_SECRET || "hamza";
-const userModel = (sequelize, DataTypes) =>{
-const users =  sequelize.define("users", {
-        username: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique : true,
-        },
-        password: {
-            type: DataTypes.STRING,
-            allowNull: true,
+const SECRET = process.env.API_SECRET || "Ssq1201sqsd23202s1d23as2s";
+
+const UserModel = (sequelize, DataTypes) => {
+    const model = sequelize.define("x", {
+        username: { type: DataTypes.STRING, required: true, unique: true },
+        password: { type: DataTypes.STRING, required: true },
+        role: { type: DataTypes.ENUM('user', 'writer', 'editor', 'admin'), required: true, defaultValue: 'user' },
+        token: {
+          type: DataTypes.VIRTUAL,
+          get() {
+            return jwt.sign({ username: this.username }, SECRET);
           },
-          role: {
-            type: DataTypes.ENUM('admin', 'writer', 'editor', 'user'),
-            defaultValue: 'user',
-          },
-          token: {
-            type: DataTypes.VIRTUAL,
-            get() {return jwt.sign({ username: this.username }, SECRET);
+          set(tokenObj) {
+            let token = jwt.sign(tokenObj, SECRET);
+            return token;
           }
-    },
-    actions: {
-        // {'read', 'create', 'update', 'delete'}
-        //('read','create','update','delete')
-        type: DataTypes.VIRTUAL,
-        get() {
-            //acl >>> access control list
+        },
+        actions: {
+          type: DataTypes.VIRTUAL,
+          get() {
             const acl = {
-                user: ['read'],
-                writer: ['read', 'create'],
-                editor: ['read', 'create', 'update'],
-                admin: ['read', 'create', 'update', 'delete']
-            }
+              user: ['read'],
+              writer: ['read', 'create'],
+              editor: ['read', 'create', 'update'],
+              admin: ['read', 'create', 'update', 'delete']
+            };
             return acl[this.role];
-        } }},{ 
-        sequelize,
-        tableName: 'users',
-        timestamps: false,
-        });
-   
+          }
+        }
+      });
 
-users.authenticateBasic = async function (username, password) {
-    const user = await users.findOne({ where: { username: username } })
-    const valid = await bcrypt.compare(password, user.password)
-    if (valid) {
-        let newToken = jwt.sign({ username: user.username }, SECRET);
+        model.authenticateBasic = async function (username, password) {
+            // console.log(username, password);
+            const user = await this.findOne({ where: { username: username } });
+            // console.log(user);
 
-        user.token = newToken;
-        return user;
-    }
-    else {
-        throw new Error("Invalid user");
-    }
-}
+            const valid = await bcrypt.compare(password, user.password);
+            if (!valid)
+            
+            { 
+          console.log("hi");
+                return user; }
+            throw new Error('Invalid User');
+          };
+        
+          model.authenticateBearer = async function (token) {
+            try {
+              const parsedToken = jwt.verify(token, SECRET);
+              const user = this.findOne({ where: { username: parsedToken.username } });
+              if (user) { return user; }
+              throw new Error("User Not Found");
+            } catch (e) {
+              throw new Error(e.message)
+            }
+          };
 
-users.authenticateBearer = async function (token) {
-    const parsedToken = jwt.verify(token, SECRET);
-    const user = await users.findOne({ where: { username: parsedToken.username } });
-    if (user.username) {
-        return user;
-    } else {
-        throw new Error("Invalid Token");
-    }
-}
-}
-module.exports = userModel;
+return model;
+};
+
+
+
+module.exports = UserModel;

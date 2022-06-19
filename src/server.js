@@ -1,38 +1,40 @@
 'use strict';
 require('dotenv').config();
-const PORT = process.env.PORT || 3000;
 const express = require("express");
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-const Error404 = require("./error-handlers/404");
-const Error500 = require("./error-handlers/500");
-const logger = require ("./middleware/logger");
+const notFoundHandler = require("./handlers/404");
+const errorHandler = require("./handlers/500");
 
-
-const signinRouters=require("./router/signin.route");
-const signupRouters=require("./router/signup.route");
-const secretRouters=require("./router/secret.route");
-const getUsersRouters=require("./router/Allusers.route");
-const aclRouter=require("./router/acl.route");
-const router=require("./router/router");
-
-
+const signInRouter=require("./routes/signin.route");
+const signUpRouter=require("./routes/signup.route");
+const secretRouter=require("./routes/secret.route");
+const getUsersRouters=require("./routes/users.route");
+const aclRouter =require("./routes/acl.route");
+const router =require("./routes/router");
+app.get("/" , handleHome)
 
 
 app.use(express.json());
-
-
-app.use(signinRouters);
-app.use(signupRouters);
-app.use(secretRouters);
+app.use(signInRouter);
+app.use(signUpRouter);
+app.use(secretRouter);
 app.use(getUsersRouters);
 app.use(aclRouter);
 app.use(router);
 
-app.use("*", Error404);
-app.use(Error500); 
+function handleHome(req ,res){
+res.send("Home page")
 
-function start(PORT) {
+
+}
+
+
+app.use("*", notFoundHandler);
+app.use(errorHandler); 
+
+function start() {
     app.listen(PORT, () => {
         console.log(`Listen and Running on port ${PORT}`);
     });
