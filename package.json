@@ -38,9 +38,7 @@
     "type": "git",
     "url": "git+https://github.com/h4mz411y/auth_api.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+
   "bugs": {
     "url": "https://github.com/h4mz411y/auth_api/issues"
   },
