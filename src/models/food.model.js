@@ -9,6 +9,10 @@ sequelize.define('food', {
     type: {
         type: DataTypes.STRING,
         required: true
+    },
+    Notes: {
+        type: DataTypes.STRING,
+        required: false
     }
 });
 
